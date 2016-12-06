@@ -19,17 +19,19 @@ excellent [blog post](http://damienclarke.me/code/posts/writing-a-better-noise-r
 ```python
 ResponsiveValue(value_func, sleep_enable=True, snap_multiplier=0.01, edge_snap_enable=True, max_value=1024, activity_threshold=4)
 ```
-
 - `value_func`: a callable without any parameters - this reads the "new" value every time `update()` is called.
    Returned values should go from 0 to `max_value` (see below).
+
+**Note**: If your callable expects parameters, pass in a lambda, e.g.:
+`rv = ResponsiveValue(lambda: your_function(1,2,3))`
+
+_optional:_
+
 - `sleep_enable`: sleep minimizes the amount of value changes over time.
 - `snap_multiplier`: controls the amount of easing; must be within 0 an 1.
 - `edge_snap_enable`: ensures that values on the end of the spectrum can be easily reached.
 - `max_value`: the maximum value `value_func` may receive. For the ESP8266's ADC, this is 1024.
 - `activity_threshold`: minimum amount of change to register as movement.
-
-**Note**: If your callable expects parameters, pass in a lambda, e.g.:
-`rv = ResponsiveValue(lambda: your_function(1,2,3))`
 
 While the defaults are sensible, feel free to experiment to get a satisfying result.
 
@@ -42,8 +44,11 @@ If you need more information on the parameters, check out their description
 ResponsiveValue.update(raw_value=None)
 ```
 
-Updates and calculates the new value by calling `value_func`. You can override
-this by manually passing in a `raw_value`.
+Updates and calculates the new value by calling `value_func`.
+
+_optional:_
+
+- `raw_value`: uses this value instead of one returned by `value_func`.
 
 ---
 
@@ -59,7 +64,7 @@ Holds the current actual "smoothed out" value.
 ResponsiveValue.has_changed
 ```
 
-`True` if there's a new `responsive_value`.
+`True` if there's a new `responsive_value`, else `False`.
 
 ## Example
 
@@ -67,6 +72,8 @@ This example has been tested on a NodeMCU microcontroller with the MicroPython f
 
 ```python
 from machine import ADC
+from uresponsivevalue import ResponsiveValue
+
 analog_pin = ADC(0)
 responsive_value = ResponsiveValue(analog_pin.read) # a callable is passed - note the missing parentheses
 
@@ -79,7 +86,6 @@ while True:
         responsive_value.sleeping,
         responsive_value._error_EMA))
 ```
-
 
 ## License
 
